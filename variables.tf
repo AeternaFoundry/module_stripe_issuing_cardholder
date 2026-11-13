@@ -74,5 +74,29 @@ EOT
     status = optional(string)
     type   = optional(string)
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.issuing_cardholders : (
+        v.spending_controls == null || (v.spending_controls.spending_limits == null || alltrue([for item in v.spending_controls.spending_limits : (contains(["all_time", "daily", "monthly", "per_authorization", "weekly", "yearly"], item.interval))]))
+      )
+    ])
+    error_message = "must be one of: \"all_time\", \"daily\", \"monthly\", \"per_authorization\", \"weekly\", \"yearly\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.issuing_cardholders : (
+        v.status == null || (contains(["active", "blocked", "inactive"], v.status))
+      )
+    ])
+    error_message = "must be one of: \"active\", \"blocked\", \"inactive\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.issuing_cardholders : (
+        v.type == null || (contains(["company", "individual"], v.type))
+      )
+    ])
+    error_message = "must be one of: \"company\", \"individual\""
+  }
 }
 
